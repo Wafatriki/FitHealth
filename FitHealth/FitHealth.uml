@@ -1,11 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_cXiPsBZPEfGxzYllEXt5ow" name="FitHealth">
+  <ownedComment xmi:type="uml:Comment" xmi:id="_FjztUBZcEfGG163ospr9Cg">
+    <body>UC1</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_c2GvIBZcEfGG163ospr9Cg">
+    <body>UC2</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_i9NQQBZcEfGG163ospr9Cg">
+    <body>UC3</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_ooxE4BZcEfGG163ospr9Cg">
+    <body>UC4</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_q7OPsBZcEfGG163ospr9Cg">
+    <body>UC5</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_tbsoYBZcEfGG163ospr9Cg">
+    <body>UC6</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_wp6Q0BZcEfGG163ospr9Cg">
+    <body>UC7</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_yhlkIBZcEfGG163ospr9Cg">
+    <body>UC8</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_1BPdcBZcEfGG163ospr9Cg">
+    <body>UC9</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_262DYBZcEfGG163ospr9Cg">
+    <body>UC10</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_6YFmUBZcEfGG163ospr9Cg">
+    <body>UC11</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_-t03gBZcEfGG163ospr9Cg">
+    <body>UC13</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_C8srsBZdEfGG163ospr9Cg">
+    <body>UC12</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_Gj0jYBZdEfGG163ospr9Cg">
+    <body>UC14</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_IchKYBZdEfGG163ospr9Cg">
+    <body>UC15</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_KcCyIBZdEfGG163ospr9Cg">
+    <body>UC16</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_MYVfsBZdEfGG163ospr9Cg">
+    <body>UC17</body>
+  </ownedComment>
   <packageImport xmi:type="uml:PackageImport" xmi:id="_cacZwBZPEfGxzYllEXt5ow">
     <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
   </packageImport>
   <packagedElement xmi:type="uml:Actor" xmi:id="_VhFf0BZQEfGi0fWU8SxTkg" name="User"/>
   <packagedElement xmi:type="uml:Actor" xmi:id="_V48mMBZQEfGi0fWU8SxTkg" name="Doctor"/>
-  <packagedElement xmi:type="uml:UseCase" xmi:id="_bPGykBZQEfGi0fWU8SxTkg" name="Track An Event">
+  <packagedElement xmi:type="uml:UseCase" xmi:id="_bPGykBZQEfGi0fWU8SxTkg" name="&lt;&lt;UC1>> Track An Event" useCase="_fcwdwBZbEfGG163ospr9Cg">
+    <ownedUseCase xmi:type="uml:UseCase" xmi:id="_fcwdwBZbEfGG163ospr9Cg" name="UseCase1" subject="_bPGykBZQEfGi0fWU8SxTkg"/>
     <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="__IBrwBZSEfGi0fWU8SxTkg" name="ExtensionPoint1"/>
     <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="_AU1dIBZTEfGi0fWU8SxTkg" name="ExtensionPoint2"/>
     <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="_BPg8sRZTEfGi0fWU8SxTkg" name="ExtensionPoint3"/>
