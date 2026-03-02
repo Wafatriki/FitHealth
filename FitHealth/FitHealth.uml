@@ -56,7 +56,7 @@
   </packageImport>
   <packagedElement xmi:type="uml:Actor" xmi:id="_VhFf0BZQEfGi0fWU8SxTkg" name="User"/>
   <packagedElement xmi:type="uml:Actor" xmi:id="_V48mMBZQEfGi0fWU8SxTkg" name="Doctor"/>
-  <packagedElement xmi:type="uml:UseCase" xmi:id="_bPGykBZQEfGi0fWU8SxTkg" name="&lt;&lt;UC1>> Track An Event" useCase="_fcwdwBZbEfGG163ospr9Cg">
+  <packagedElement xmi:type="uml:UseCase" xmi:id="_bPGykBZQEfGi0fWU8SxTkg" name="Track An Event" useCase="_fcwdwBZbEfGG163ospr9Cg">
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_fcwdwBZbEfGG163ospr9Cg" name="UseCase1" subject="_bPGykBZQEfGi0fWU8SxTkg"/>
     <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="__IBrwBZSEfGi0fWU8SxTkg" name="ExtensionPoint1"/>
     <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="_AU1dIBZTEfGi0fWU8SxTkg" name="ExtensionPoint2"/>
