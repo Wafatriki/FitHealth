@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.auth import hash_password
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 
@@ -12,17 +13,24 @@ def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter(User.email == email).first()
 
 
+def get_user_by_username(db: Session, username: str) -> User | None:
+    return db.query(User).filter(User.username == username).first()
+
+
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
 
+def get_doctors(db: Session) -> list[User]:
+    return db.query(User).filter(User.role == "doctor", User.is_active == True).all()  # noqa: E712
+
+
 def create_user(db: Session, user_data: UserCreate) -> User:
-    # TODO: hashear la contraseña con bcrypt antes de guardarla
-    fake_hashed_password = user_data.password + "_hashed"
     db_user = User(
         email=user_data.email,
         username=user_data.username,
-        hashed_password=fake_hashed_password,
+        hashed_password=hash_password(user_data.password),
+        role=user_data.role,
     )
     db.add(db_user)
     db.commit()

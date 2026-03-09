@@ -1,0 +1,68 @@
+from datetime import datetime, timezone
+
+from sqlalchemy.orm import Session
+
+from app.models.event import (
+    Event, BiometricData, WaterLog, ActivityLog, FoodLog, WeightLog,
+)
+from app.schemas.event import EventCreate, EventUpdate
+
+
+def get_event(db: Session, event_id: int) -> Event | None:
+    return db.query(Event).filter(Event.id == event_id).first()
+
+
+def get_events_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> list[Event]:
+    return (
+        db.query(Event)
+        .filter(Event.user_id == user_id)
+        .order_by(Event.timestamp.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+
+def create_event(db: Session, event_data: EventCreate, user_id: int) -> Event:
+    db_event = Event(
+        user_id=user_id,
+        name=event_data.name,
+        event_type=event_data.event_type,
+        timestamp=event_data.timestamp or datetime.now(timezone.utc),
+        notes=event_data.notes,
+    )
+    if event_data.biometric:
+        db_event.biometric = BiometricData(**event_data.biometric.model_dump())
+    if event_data.water_log:
+        db_event.water_log = WaterLog(**event_data.water_log.model_dump())
+    if event_data.activity_log:
+        db_event.activity_log = ActivityLog(**event_data.activity_log.model_dump())
+    if event_data.food_log:
+        db_event.food_log = FoodLog(**event_data.food_log.model_dump())
+    if event_data.weight_log:
+        db_event.weight_log = WeightLog(**event_data.weight_log.model_dump())
+
+    db.add(db_event)
+    db.commit()
+    db.refresh(db_event)
+    return db_event
+
+
+def update_event(db: Session, event_id: int, event_data: EventUpdate) -> Event | None:
+    db_event = get_event(db, event_id)
+    if not db_event:
+        return None
+    for field, value in event_data.model_dump(exclude_unset=True).items():
+        setattr(db_event, field, value)
+    db.commit()
+    db.refresh(db_event)
+    return db_event
+
+
+def delete_event(db: Session, event_id: int) -> bool:
+    db_event = get_event(db, event_id)
+    if not db_event:
+        return False
+    db.delete(db_event)
+    db.commit()
+    return True
