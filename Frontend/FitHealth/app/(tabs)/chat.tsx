@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import api from '@/services/api';
+import { WS_BASE_URL } from '@/services/api';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/context/auth-context';
@@ -37,13 +38,15 @@ type Message = {
 export default function ChatScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [doctors, setDoctors] = useState<{ id: number; username: string }[]>([]);
+  const wsRef = useRef<WebSocket | null>(null);
+  const flatListRef = useRef<FlatList>(null);
 
   const fetchRooms = async () => {
     try {
@@ -72,6 +75,32 @@ export default function ChatScreen() {
     }, [])
   );
 
+  // Connect / disconnect WebSocket when selectedRoom changes
+  useEffect(() => {
+    if (!selectedRoom || !token) return;
+
+    const ws = new WebSocket(`${WS_BASE_URL}/chat/ws/${selectedRoom.id}?token=${token}`);
+    wsRef.current = ws;
+
+    ws.onmessage = (event) => {
+      const msg: Message = JSON.parse(event.data);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+    };
+
+    ws.onerror = () => {
+      // Silent — fallback to REST still works
+    };
+
+    return () => {
+      ws.close();
+      wsRef.current = null;
+    };
+  }, [selectedRoom, token]);
+
   const openRoom = async (room: ChatRoom) => {
     setSelectedRoom(room);
     try {
@@ -84,14 +113,20 @@ export default function ChatScreen() {
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedRoom) return;
-    try {
-      const res = await api.post(`/chat/rooms/${selectedRoom.id}/messages`, {
-        content: newMessage.trim(),
-      });
-      setMessages((prev) => [...prev, res.data]);
-      setNewMessage('');
-    } catch {
-      Alert.alert('Error', 'No se pudo enviar el mensaje');
+    const content = newMessage.trim();
+    setNewMessage('');
+
+    // Send via WebSocket if connected
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ content }));
+    } else {
+      // Fallback to REST
+      try {
+        const res = await api.post(`/chat/rooms/${selectedRoom.id}/messages`, { content });
+        setMessages((prev) => [...prev, res.data]);
+      } catch {
+        Alert.alert('Error', 'No se pudo enviar el mensaje');
+      }
     }
   };
 
@@ -134,9 +169,11 @@ export default function ChatScreen() {
         </View>
 
         <FlatList
+          ref={flatListRef}
           data={messages}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.messageList}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
           renderItem={({ item }) => {
             const isMe = item.sender_id === user?.id;
             return (
@@ -166,6 +203,9 @@ export default function ChatScreen() {
             placeholderTextColor={colors.icon}
             value={newMessage}
             onChangeText={setNewMessage}
+            onSubmitEditing={sendMessage}
+            returnKeyType="send"
+            blurOnSubmit={false}
           />
           <TouchableOpacity style={[styles.sendBtn, { backgroundColor: colors.primary }]} onPress={sendMessage}>
             <Text style={styles.sendBtnText}>Enviar</Text>

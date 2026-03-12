@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
+from jose import jwt
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -120,27 +121,64 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
+def _get_user_from_token(token: str, db: Session) -> User | None:
+    """Validate a JWT token and return the user, or None."""
+    try:
+        from app.config import settings
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        sub: str | None = payload.get("sub")
+        if sub is None:
+            return None
+        user_id = int(sub)
+    except Exception:
+        return None
+    return db.query(User).filter(User.id == user_id).first()
+
+
 @router.websocket("/ws/{room_id}")
 async def websocket_chat(websocket: WebSocket, room_id: int):
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    db = SessionLocal()
+    try:
+        user = _get_user_from_token(token, db)
+        if not user:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+
+        # Verify the user belongs to this room
+        rooms = crud.chat.get_chat_rooms_for_user(db, user.id)
+        if not any(r.id == room_id for r in rooms):
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+    finally:
+        db.close()
+
     await manager.connect(websocket, room_id)
     try:
         while True:
             data = await websocket.receive_json()
-            sender_id = data.get("sender_id")
-            content = data.get("content")
-            if sender_id and content:
-                db = SessionLocal()
-                try:
-                    msg = crud.chat.create_message(db, room_id, sender_id=sender_id, content=content)
-                    await manager.broadcast(room_id, {
-                        "id": msg.id,
-                        "chat_room_id": msg.chat_room_id,
-                        "sender_id": msg.sender_id,
-                        "content": msg.content,
-                        "is_read": msg.is_read,
-                        "timestamp": msg.timestamp.isoformat(),
-                    })
-                finally:
-                    db.close()
+            content = data.get("content", "").strip()
+            if not content:
+                continue
+
+            db = SessionLocal()
+            try:
+                msg = crud.chat.create_message(db, room_id, sender_id=user.id, content=content)
+                message_data = {
+                    "id": msg.id,
+                    "chat_room_id": msg.chat_room_id,
+                    "sender_id": msg.sender_id,
+                    "content": msg.content,
+                    "is_read": msg.is_read,
+                    "timestamp": msg.timestamp.isoformat(),
+                }
+            finally:
+                db.close()
+
+            await manager.broadcast(room_id, message_data)
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)
