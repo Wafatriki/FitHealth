@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/context/auth-context';
@@ -10,10 +10,16 @@ export default function ProfileScreen() {
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    Alert.alert('Cerrar Sesión', '¿Seguro que quieres salir?', [
-      { text: 'Cancelar' },
-      { text: 'Salir', style: 'destructive', onPress: logout },
-    ]);
+    if (Platform.OS === 'web') {
+      if (window.confirm('¿Seguro que quieres cerrar sesión?')) {
+        logout();
+      }
+    } else {
+      Alert.alert('Cerrar Sesión', '¿Seguro que quieres salir?', [
+        { text: 'Cancelar' },
+        { text: 'Salir', style: 'destructive', onPress: logout },
+      ]);
+    }
   };
 
   return (
