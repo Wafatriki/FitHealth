@@ -23,25 +23,27 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<'patient' | 'doctor'>('patient');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRegister = async () => {
+    setError(null);
     if (!email || !username || !password || !confirmPassword) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+      setError('Por favor completa todos los campos');
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      setError('Las contraseñas no coinciden');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      setError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
     setLoading(true);
     try {
       await register(email.trim(), username.trim(), password, role);
     } catch {
-      Alert.alert('Error', 'No se pudo crear la cuenta. Verifica tus datos.');
+      setError('No se pudo crear la cuenta. Verifica tus datos.');
     } finally {
       setLoading(false);
     }
@@ -122,6 +124,8 @@ export default function RegisterScreen() {
             </View>
           </View>
 
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleRegister}
@@ -190,6 +194,13 @@ const styles = StyleSheet.create({
     color: '#1565C0',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  errorText: {
+    color: '#D32F2F',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 14,
+    fontWeight: '600',
   },
   input: {
     borderWidth: 1,
